@@ -23,7 +23,8 @@ class TraderBot:
                         self.num_shares += num_shares
 
                         net = float(num_shares * self.current_price)
-                        self.aggregate_price = float(net + float(self.aggregate_price * (self.num_shares - num_shares))) / self.num_shares
+                        self.aggregate_price = round(float(net + float(self.aggregate_price * (self.num_shares - num_shares))) / self.num_shares, 3)
+                        self.stop_loss = round(self.aggregate_price - float(self.aggregate_price * 0.2), 3)
 
                 def getOverallLossGain(self):
                         return (self.num_shares * self.current_price) - (self.num_shares * self.aggregate_price)
@@ -53,6 +54,9 @@ class TraderBot:
                                 symbols = data["open_positions"].keys()
 
                                 for symbol in symbols:
+                                        # Need to ignore any positions that don't have any shares
+                                        if data["open_positions"][symbol]["number_of_shares"] == 0:
+                                                continue
                                         self.positions[symbol] = self.Position()
                                         self.positions[symbol].num_shares = data["open_positions"][symbol]["number_of_shares"]
                                         self.positions[symbol].aggregate_price = data["open_positions"][symbol]["aggregate_price"]
@@ -76,11 +80,6 @@ class TraderBot:
                 self.api_key = api_key
                 self.url_prices = url_prices
                 self.url_movement = url_movement
-
-                # Get all relevant info for desirable stocks
-
-                self.getBiggestMovers()
-                self.getPricesForAllSymbols()
 
         def timeInRange(self):
 
@@ -227,11 +226,14 @@ class TraderBot:
                 movers.update(losers)
 
                 for mover in movers.keys():
+                        print("Movers: {}".format(movers))
                         if mover not in self.positions.keys() and len(self.positions) < self.max_positions:
                                 self.positions[mover] = self.Position()
                         else:
-                                self.positions[mover].movement = losers[mover]
-                        self.positions[mover].movement = losers[mover]
+                                self.positions[mover].movement = movers[mover]
+                        self.positions[mover].movement = movers[mover]
+
+                return movers
 
         def Serialize(self, location):
                 file = open(location+"/state.json", "w+")

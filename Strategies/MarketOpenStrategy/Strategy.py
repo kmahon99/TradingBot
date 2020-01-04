@@ -29,6 +29,10 @@ class Strategy:
 
                 movers = self.bot.getBiggestMovers()
 
+                if movers == None:
+                        print("\nAll positions still filled from last trading session\n")
+                        return
+
                 self.bot.getPricesForAllSymbols()
 
                 # Get the amount we can spend on each symbol
@@ -70,9 +74,10 @@ class Strategy:
                 print("\n====== Looking for potential sales ======\n")
 
                 self.bot.getPricesForAllSymbols()
+
                 for symbol in self.bot.positions.keys():
                         net = self.bot.positions[symbol].getOverallLossGain()
-                        if net >= 1:
+                        if net >= 1 or self.bot.positions[symbol].current_price <= self.bot.positions[symbol].stop_loss:
                                 self.bot.Sell(symbol, self.bot.positions[symbol].num_shares)
 
                 print("\n====== Finished sales round ======\n")
