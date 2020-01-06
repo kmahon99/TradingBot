@@ -111,7 +111,12 @@ class TraderBot:
                         print("Can't contact Alpha Vantage!")
                         return
 
-                data = json.load(response)["Stock Quotes"]
+                data = {}
+
+                try:
+                        data = json.load(response)["Stock Quotes"]
+                except KeyError:
+                        return
 
                 result = {}
 
@@ -155,7 +160,7 @@ class TraderBot:
 
                                 print("{} isn't in the list of positions!".format(symbol))
 
-                        self.capital -= round(num_shares * self.positions[symbol].current_price, 5)
+                        self.capital-= round(num_shares * self.positions[symbol].current_price, 3)
                         return num_shares
 
                 except KeyError:
@@ -172,7 +177,7 @@ class TraderBot:
 
                         net = self.positions[symbol].getOverallLossGain()
                         self.positions[symbol].Update(-amount)
-                        self.capital += round(amount * self.positions[symbol].current_price, 5)
+                        self.capital += round(amount * self.positions[symbol].current_price, 3)
 
                         if self.positions[symbol].num_shares == 0:
                                 self.positions.pop(symbol)

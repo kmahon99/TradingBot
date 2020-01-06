@@ -40,9 +40,9 @@ class Strategy:
                 percent = float(1 / len(movers))
 
                 for stock in movers.keys():
-                        print("Capital before buy: {}".format(str(self.bot.capital)))
+                        print("Capital before buy: ${}".format(str(self.bot.capital)))
                         self.bot.Buy(stock, self.bot.initial_capital * percent)
-                        print("Capital after buy: {}".format(str(self.bot.capital)))
+                        print("Capital after buy: ${}".format(str(self.bot.capital)))
 
                 print("Remaining capital: {}".format(self.bot.capital))
 
