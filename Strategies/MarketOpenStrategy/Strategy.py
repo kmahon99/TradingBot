@@ -15,7 +15,7 @@ class Strategy:
                         URL_PRICES,
                         URL_MOVEMENT,
                         1000,
-                        4,
+                        10,
                         os.path.dirname(os.path.realpath(__file__)))
 
                 self.schedule()
@@ -77,7 +77,7 @@ class Strategy:
 
                 for symbol in self.bot.positions.keys():
                         net = self.bot.positions[symbol].getOverallLossGain()
-                        if net >= 1 or self.bot.positions[symbol].current_price <= self.bot.positions[symbol].stop_loss:
+                        if net >= (self.bot.positions[symbol].num_shares * self.bot.positions[symbol].aggregate_price) * 0.02 or self.bot.positions[symbol].current_price <= self.bot.positions[symbol].stop_loss:
                                 self.bot.Sell(symbol, self.bot.positions[symbol].num_shares)
 
                 print("\n====== Finished sales round ======\n")

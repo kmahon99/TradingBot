@@ -12,6 +12,9 @@ class TraderBot:
                         self.current_price = 0
                         self.movement = 0
                         self.stop_loss = 0
+                        self.stop_loss_level = 0
+                        self.target = 0
+                        self.target_level = 0
 
                 def Update(self, num_shares = 0):
 
@@ -24,7 +27,8 @@ class TraderBot:
 
                         net = float(num_shares * self.current_price)
                         self.aggregate_price = round(float(net + float(self.aggregate_price * (self.num_shares - num_shares))) / self.num_shares, 3)
-                        self.stop_loss = round(self.aggregate_price - float(self.aggregate_price * 0.2), 3)
+                        self.stop_loss = round(self.aggregate_price - float(self.aggregate_price * self.stop_loss_level), 3)
+                        self.target = round(self.aggregate_price + float(self.aggregate_price * self.target_level), 3)
 
                 def getOverallLossGain(self):
                         return (self.num_shares * self.current_price) - (self.num_shares * self.aggregate_price)
@@ -140,7 +144,7 @@ class TraderBot:
 
                 print("\nPrices updated for {}\n".format(",".join(result.keys())))
 
-        def Buy(self, symbol, amount):
+        def Buy(self, symbol, amount, desired_gain, stop_loss):
                 try:
 
                         if self.positions[symbol].current_price == 0:
@@ -161,6 +165,8 @@ class TraderBot:
                                 print("{} isn't in the list of positions!".format(symbol))
 
                         self.capital-= round(num_shares * self.positions[symbol].current_price, 3)
+                        self.positions[symbol].stop_loss_level = stop_loss
+                        self.positions[symbol].target_level = desired_gain
                         return num_shares
 
                 except KeyError:
@@ -182,7 +188,9 @@ class TraderBot:
                         if self.positions[symbol].num_shares == 0:
                                 self.positions.pop(symbol)
 
-                        print("Sold {} shares of {} @ {}, aggregate: {}".format(amount, symbol, self.positions[symbol].current_price, self.positions[symbol].aggregate_price))
+                        print("Sold {} shares of {} @ {}".format(amount, symbol, self.positions[symbol].current_price, self.positions[symbol].aggregate_price))
+                        print("Original value: ${} ".format(num_shares * self.positions[symbol].aggregate_price))
+                        print("Current value: ${} ".format(num_shares * self.positions[symbol].current_price))
 
                         if net <= 0:
                                 print("Lost ${}".format(-net))
